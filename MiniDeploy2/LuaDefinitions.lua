@@ -78,3 +78,56 @@ function copyInfoBox(srcDrive)
 		end
 	end
 end
+
+function installDotNet45(srvDrive)
+	return deploy.startProcess(srcDrive .. "\\DotNet\\DotNet45\\NDP452-KB2901907-x86-x64-AllOS-ENU.exe", "/passive /norestart");
+end
+
+function installDotNet45LP(srvDrive)
+	return deploy.startProcess(srcDrive .. "\\DotNet\\DotNet45\\dotNetFx45LP_Full_x86_x64de.exe", "/passive /norestart");
+end
+
+function installAVClient(srcDrive)
+	return deploy.startProcess(srcDrive .. "\\Software\\GdataClient\\GDClientPck.exe", "");
+end
+
+function installFlashPlayerActiveX(srcDrive)
+	return deploy.startProcess("msiexec", "/i \"" .. srcDrive .. "\\Flash Player\\install_flash_player18_active_x.msi\" /passive /norestart");
+end
+
+function installFlashPlayerPlugin(srcDrive)
+	return deploy.startProcess("msiexec", "/i \"" .. srcDrive .. "\\Flash Player\\install_flash_player18_plugin.msi\" /passive /norestart");
+end
+
+function installCommunicator(srcDrive)
+	return deploy.startProcess("msiexec", "/i \"" .. srcDrive .. "\\Communicator 2007 R2\\Communicator.msi\" /passive /norestart");
+end
+
+function installCommunicatorHotfix(srcDrive)
+	return deploy.startProcess("msiexec", "/p \"" .. srcDrive .. "\\Communicator 2007 R2\\Hotfix OCS R2\\Communicator.msp\" REINSTALL=ALL REINSTALLMODE=omus /passive /norestart");
+end
+
+function installMSSQLNativeClient(srcDrive)
+	if (deploy.is64Bit()) then
+		return deploy.startProcess("msiexec", "/i \"" .. srcDrive .. "\\SQL Native Client\\sqlncli 2008 x64.msi\" /passive /norestart");
+	else
+		return deploy.startProcess("msiexec", "/i \"" .. srcDrive .. "\\SQL Native Client\\sqlncli 2008 x86.msi\" /passive /norestart");
+	end
+end
+
+function deinstallAcrobatReader(srcDrive)
+	return deploy.startProcess("msiexec", "/x {AC76BA86-7AD7-1031-7B44-AB0000000001} /qn /norestart");
+end
+
+function installAcrobatReader(srcDrive)
+	return deploy.startProcess(" .. srcDrive .. "\\Adobe\\AdbeRdr11008_de_DE\\setup.exe", "/sAll /rs /rps /msi TRANSFORMS=AcroRead.mst");
+end
+
+function installVirtualCloneDrive(srcDrive)
+	ret = true;
+
+	if (startProcess("certutil", "-addstore \"TrustedPublisher\" " .. srcDrive .. "\\Software\\SlySoft\\Elaborate.p7b") != true) then ret = false; end
+	if (startProcess(srcDrive .. "\\Software\\SlySoft\\SetupVirtualCloneDrive5440.exe", "/S") != true) then ret = false; end
+
+	return ret;
+end

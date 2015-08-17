@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.DirectoryServices;
+using System.Drawing;
+using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using System.Windows.Forms;
@@ -15,6 +18,13 @@ namespace MiniDeploy2
     [MoonSharpUserData]
     class LuaFunctions
     {
+        [DllImport("gdi32", EntryPoint = "AddFontResource")]
+        public static extern int AddFontRessourceA(string lpFileName);
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(int hWnd, uint Msg, int wParam, int lParam);
+        [DllImport("kernel32.dll")]
+        public static extern int WriteProfileString(string lpszSection, string lpszKeyName, string lpszString);
+
         public static bool is32Bit()
         {
             return (System.Environment.Is64BitOperatingSystem == false);
@@ -25,7 +35,7 @@ namespace MiniDeploy2
             return (System.Environment.Is64BitOperatingSystem == true);
         }
 
-        public static bool setAdminPassword(String password) // set local admin password
+        public static bool setAdminPassword(string password) // set local admin password
         {
             string computerName = System.Environment.MachineName;
             string userName = "Administrator";
@@ -86,6 +96,11 @@ namespace MiniDeploy2
             return System.Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\";
         }
 
+        public static string getFontPath() // returns the path to the windows font directory
+        {
+            return System.Environment.GetFolderPath(Environment.SpecialFolder.Fonts) + "\\";
+        }
+
         public static bool isDirectory(string path) // checks if given path is a directory
         {
             return Directory.Exists(path);
@@ -120,6 +135,26 @@ namespace MiniDeploy2
                 return false;
             }
             return true;
+        }
+
+        public static bool installFonts(string path) // installs all fonts from a given directory
+        {
+            bool ret = true;
+
+            foreach (string file in Directory.EnumerateFiles(path, "*.ttf"))
+            {
+                string fileName = file.Split('\\')[file.Split('\\').Count() - 1];
+                if (fileCopy(file, getFontPath() + fileName) != true) ret = false;
+                if (AddFontRessourceA(getFontPath() + fileName) == 0) ret = false;
+                SendMessage(0xffff, 0x001d, 0, 0);
+
+                PrivateFontCollection fontCol = new PrivateFontCollection();
+                fontCol.AddFontFile(getFontPath() + fileName);
+
+                WriteProfileString("fonts", fontCol.Families[0].Name, fileName);
+            }
+
+            return ret;
         }
     }
 }
