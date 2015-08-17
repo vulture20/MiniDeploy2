@@ -120,7 +120,7 @@ function deinstallAcrobatReader(srcDrive)
 end
 
 function installAcrobatReader(srcDrive)
-	return deploy.startProcess(" .. srcDrive .. "\\Adobe\\AdbeRdr11008_de_DE\\setup.exe", "/sAll /rs /rps /msi TRANSFORMS=AcroRead.mst");
+	return deploy.startProcess(srcDrive .. "\\Adobe\\AdbeRdr11008_de_DE\\setup.exe", "/sAll /rs /rps /msi TRANSFORMS=AcroRead.mst");
 end
 
 function installVirtualCloneDrive(srcDrive)
